@@ -7,10 +7,3 @@ type User struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
-
-// Auth is a structure which allows us to handle user sessions with tokens
-type Auth struct {
-	ID     int64  `xorm:"pk autoincr"`
-	UserID string `json:"userID"`
-	Token  string `json:"token"`
-}

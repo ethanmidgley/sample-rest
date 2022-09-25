@@ -23,7 +23,6 @@ func Init() *DB {
 		log.Panic(err)
 	}
 	engine.Sync(new(models.User))
-	engine.Sync(new(models.Auth))
 
 	return &DB{Client: engine}
 }

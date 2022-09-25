@@ -1,8 +1,12 @@
 package api
 
 import (
+	"os"
+
 	"github.com/ethanmidgley/sample-rest/pkg/db"
 	"github.com/ethanmidgley/sample-rest/pkg/handlers"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 )
 
@@ -10,6 +14,9 @@ import (
 func CreateRoutes(database *db.DB) *gin.Engine {
 
 	r := gin.Default()
+
+	store := cookie.NewStore([]byte(os.Getenv("SESSIONSECRET")))
+	r.Use(sessions.Sessions("sid", store))
 
 	a := r.Group("/user")
 	handlers.AttachUser(a, database)

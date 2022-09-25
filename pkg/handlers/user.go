@@ -5,6 +5,7 @@ import (
 	"github.com/ethanmidgley/sample-rest/pkg/db"
 	"github.com/ethanmidgley/sample-rest/pkg/db/models"
 	"github.com/ethanmidgley/sample-rest/pkg/user"
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
 
@@ -22,7 +23,17 @@ func AttachUser(router *gin.RouterGroup, db *db.DB) {
 
 }
 
-// func Login() {}
+// func (u *UH) Login(ctx *gin.Context) {
+// }
+
+// TODO: this is how to implement the getting of a user id from the session and checking if it is set and casting it to int64
+// if tmp := session.Get("user-id"); tmp != nil {
+//	we have a userID
+// 	userID = tmp.(int64)
+// } else {
+//	we do not have a userID
+// 	return
+// }
 
 // Register is the handler for user registration
 func (u *UH) Register(ctx *gin.Context) {
@@ -33,13 +44,18 @@ func (u *UH) Register(ctx *gin.Context) {
 		return
 	}
 
-	_, err := user.Register(&data, u.DB.Client)
+	session := sessions.Default(ctx)
+
+	output, err := user.Register(&data, u.DB.Client)
 	if err != nil {
-		// ctx.JSON(500, gin.H{"error": err.Error()})
+		ctx.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
 
-	ctx.JSON(200, gin.H{"hell": "how are you"})
+	session.Set("user-id", output.User.ID)
+	session.Save()
+
+	ctx.JSON(200, output)
 	return
 
 }
