@@ -22,9 +22,14 @@ type RegisterOutput struct {
 // Register will take in user details perform validation checks if the details pass the user will be added to the database
 func Register(details *models.User, database *xorm.Engine) (*RegisterOutput, error) {
 
-	var otherUser models.User
-	database.Find(&otherUser, &models.User{Username: details.Username})
-	if otherUser == (models.User{}) {
+	otherUser := models.User{
+		Username: details.Username,
+	}
+	has, err := database.Get(&otherUser)
+	if err != nil {
+		return nil, errors.New("failed to query database")
+	}
+	if has {
 		return &RegisterOutput{Error: &types.FieldError{Field: "username", Message: "username has already been taken"}}, nil
 	}
 
@@ -32,7 +37,7 @@ func Register(details *models.User, database *xorm.Engine) (*RegisterOutput, err
 		return &RegisterOutput{Error: &types.FieldError{Field: "password", Message: "password has to be longer 8 characters"}}, nil
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(details.Password), 16)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(details.Password), bcrypt.MinCost)
 	if err != nil {
 		return nil, errors.New("unable to secure password")
 	}
@@ -42,7 +47,7 @@ func Register(details *models.User, database *xorm.Engine) (*RegisterOutput, err
 	if err != nil {
 		log.Panic(err)
 	}
-	// return details, nil, nil
+
 	return &RegisterOutput{User: details}, nil
 
 }
